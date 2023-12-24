@@ -22,8 +22,11 @@ CC						=	gcc
 CFLAGS				=	#-Wall -Wextra -Werror -pedantic
 
 # UI Progress Bar
-TOTAL_FILES		:= $(words $(SRCS))
-CURRENT				:= 0
+TOTAL_FILES			:= $(words $(SRCS))
+MAX_BAR_LENGTH	:= 100
+PROGRESS_TEXT		= "Progression [$(BAR_FILL)$(BAR_EMPTY)] $(PERCENT)%"
+PROGRESS_TEXT_LENGTH := $(shell expr `echo -n $(PROGRESS_TEXT) | wc -c` + $(MAX_BAR_LENGTH))
+INDENT					:= $(shell expr \( `tput cols` - $(PROGRESS_TEXT_LENGTH) \) / 2)
 
 define banner
 
@@ -42,10 +45,15 @@ endef
 export banner
 
 define update_progress
-	$(eval CURRENT=$(shell echo $(CURRENT) + 1 | bc))
-	@printf "Progression : [$(CURRENT)/$(TOTAL_FILES)] %d%%\r" $$(expr $(CURRENT) \* 100 / $(TOTAL_FILES))
+	$(eval CURRENT=$(shell expr $(CURRENT) + 1))	#	Nombre actuel de fichier traité
+	$(eval PERCENT=$(shell expr $(CURRENT) \* 100 / $(TOTAL_FILES)))	# Pourcentage actuel de fichier traité
+	$(eval FILLED_LENGTH=$(shell expr $(PERCENT) \* $(MAX_BAR_LENGTH) / 100)) # Longueur de la bar de chargement
+	$(eval UNFILLED_LENGTH=$(shell expr $(MAX_BAR_LENGTH) - $(FILLED_LENGTH))) # Longueur restante de la bar de chargement
+	$(eval BAR_FILL=$(shell printf "%0.s=" `seq 1 $(FILLED_LENGTH)`)) # Génère la bar de progression
+	$(eval BAR_EMPTY=$(if $(shell test $(UNFILLED_LENGTH) -gt 0 && echo true),$(shell printf "%0.s-" `seq 1 $(UNFILLED_LENGTH)`),)) # Génère la longueur restante de la bar de progression
+	printf "%*s%s\r" $(INDENT) '' $(PROGRESS_TEXT)
 	@if [ $(CURRENT) -eq $(TOTAL_FILES) ]; then \
-		echo ""; \
+			echo ""; \
 	fi
 endef
 
