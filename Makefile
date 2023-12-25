@@ -30,24 +30,26 @@ INDENT					:= $(shell expr \( `tput cols` - $(PROGRESS_TEXT_LENGTH) \) / 2)
 FILENAME				:= ""
 
 # Colors
-WHITE						= \x1b[38;2;111;97;192m
-PINK						= \x1b[38;2;160;132;232m
-PURPLE					= \x1b[38;2;139;232;229m
-DARK_PURPLE			= \x1b[38;2;213;255;228m
+DARK_PURPLE			= \x1b[38;2;179;153;250m
+PURPLE					= \x1b[38;2;196;160;250m
+LIGHT_PURPLE		= \x1b[38;2;216;177;250m
+
+GREEN						= \x1b[38;2;202;250;166m
+YELLOW					= \x1b[38;2;250;235;185m
 RESET						= \x1b[0;0m
 
 define banner
 
- ██████╗ ██╗  ██╗███████╗ ██████╗ ██████╗  ██████╗ 
-██╔═████╗╚██╗██╔╝╚════██║██╔════╝██╔═████╗██╔═████╗
-██║██╔██║ ╚███╔╝     ██╔╝██║     ██║██╔██║██║██╔██║
-████╔╝██║ ██╔██╗    ██╔╝ ██║     ████╔╝██║████╔╝██║
-╚██████╔╝██╔╝ ██╗   ██║  ╚██████╗╚██████╔╝╚██████╔╝
- ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═════╝ ╚═════╝  ╚═════╝                                      
+$(DARK_PURPLE) ██████╗ ██╗  ██╗███████╗ ██████╗ ██████╗  ██████╗ $(RESET)
+$(DARK_PURPLE)██╔═████╗╚██╗██╔╝╚════██║██╔════╝██╔═████╗██╔═████╗$(RESET)
+$(PURPLE)██║██╔██║ ╚███╔╝     ██╔╝██║     ██║██╔██║██║██╔██║$(RESET)
+$(PURPLE)████╔╝██║ ██╔██╗    ██╔╝ ██║     ████╔╝██║████╔╝██║$(RESET)
+$(LIGHT_PURPLE)╚██████╔╝██╔╝ ██╗   ██║  ╚██████╗╚██████╔╝╚██████╔╝$(RESET)
+$(LIGHT_PURPLE) ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═════╝ ╚═════╝  ╚═════╝ $(RESET)
 						
-	• Author: $(AUTHOR)
-	• Github: $(GITHUB)
-	• Project: $(PROJECT_NAME)
+	$(GREEN)• Author: $(YELLOW)$(AUTHOR)$(RESET)
+	$(GREEN)• Github: $(YELLOW)$(GITHUB)$(RESET)
+	$(GREEN)• Project: $(YELLOW)$(PROJECT_NAME)$(RESET)
 
 
 endef
@@ -75,14 +77,10 @@ all: BANNER $(OBJS)
 
 BANNER:
 	@clear
-	@printf "$(WHITE)8888$(RESET)"
-	@printf "$(PINK)8888$(RESET)"
-	@printf "$(PURPLE)8888$(RESET)"
-	@printf "$(DARK_PURPLE)8888$(RESET)"
 	@cols=$$(tput cols);	\
 		banner_width=51;		\
 		indent=$$((($$cols - $$banner_width) / 2));		\
-		echo "$$banner" | while IFS= read -r line; do	\
+		echo -e "$$banner" | while IFS= read -r line; do	\
 			printf "%*s%s\n" "$$indent" '' "$$line";	\
 		done;
 
