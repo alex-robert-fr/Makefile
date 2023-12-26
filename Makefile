@@ -3,11 +3,12 @@ CC						:=	gcc
 CFLAGS				=	#-Wall -Wextra -Werror -pedanticAUTHOR									=	0x7c00
 
 # Informations
+AUTHOR									=	0x7c00
 PROJECT_NAME						=	project_name
 GITHUB									=	https://github.com/alex-robert-fr
 PROJECT_VERSION					= 1.0.0
-COMPILER								:= $(shell $(CC) --version | head -n 1 | awk '{print toupper($$1), $$3}')
-OS											= Feedora
+COMPILER								= $(shell $(CC) --version | head -n 1 | awk '{print toupper($$1), $$3}')
+OS_VERSION							= $(shell lsb_release -si; lsb_release -sr)
 BUILD_TYPE							= Debug
 MAKEFILE_LAST_UPDATE		= 2023
 
@@ -70,7 +71,7 @@ BANNER:
 	@printf "╗\n"
 	@printf "║ $(GREEN)%-16s$(YELLOW)%-35s$(DARK_PURPLE) ║ $(GREEN)%-16s$(YELLOW)%-35s$(DARK_PURPLE) ║\n" "• Author: " $(AUTHOR) "Project: " "$(PROJECT_NAME)"
 	@printf "║ $(GREEN)%-16s$(YELLOW)%-35s$(DARK_PURPLE) ║ $(GREEN)%-16s$(YELLOW)%-35s$(DARK_PURPLE) ║\n" "• Github: " $(GITHUB) "Version: " "$(PROJECT_VERSION)"
-	@printf "║ $(GREEN)%-16s$(YELLOW)%-35s$(DARK_PURPLE) ║ $(GREEN)%-16s$(YELLOW)%-35s$(DARK_PURPLE) ║\n" "• Compiler: " "$(COMPILER)" "OS: " "$(PROJECT_VERSION)"
+	@printf "║ $(GREEN)%-16s$(YELLOW)%-35s$(DARK_PURPLE) ║ $(GREEN)%-16s$(YELLOW)%-35s$(DARK_PURPLE) ║\n" "• Compiler: " "$(COMPILER)" "OS: " "$(OS_VERSION)"
 	@printf "║ $(GREEN)%-16s$(YELLOW)%-35s$(DARK_PURPLE) ║ $(GREEN)%-16s$(YELLOW)%-35s$(DARK_PURPLE) ║\n" "• Build Type: " $(BUILD_TYPE) "Last Update: " "$(MAKEFILE_LAST_UPDATE)"
 	@printf "╚"
 	@printf "%0.s═" `seq 1 51`
