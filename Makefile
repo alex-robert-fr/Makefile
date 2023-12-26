@@ -4,13 +4,13 @@ CFLAGS				=	#-Wall -Wextra -Werror -pedanticAUTHOR									=	0x7c00
 
 # Informations
 AUTHOR									=	0x7c00
-PROJECT_NAME						=	project_name
+PROJECT_NAME						=	Makefile
 GITHUB									=	https://github.com/alex-robert-fr
 PROJECT_VERSION					= 1.0.0
 COMPILER								= $(shell $(CC) --version | head -n 1 | awk '{print toupper($$1), $$3}')
 OS_VERSION							= $(shell lsb_release -si; lsb_release -sr)
 BUILD_TYPE							= Debug
-MAKEFILE_LAST_UPDATE		= 2023
+MAKEFILE_LAST_UPDATE		:= $(shell date -d "$(shell stat -c %y Makefile)" +'%Y-%m-%d %H:%M')
 
 #	Output
 DIST					=	build
