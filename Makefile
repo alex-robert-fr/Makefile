@@ -32,6 +32,10 @@ REAL_SIZE_CMD		=	107
 SIZE_TWO_COLS		:=	$(shell expr $(CMD_SIZE) / 2)
 INDENT					= 4
 
+# Loading
+LOADING_EMOJIS := 🌑 🌒 🌓 🌔 🌕 🌖 🌗 🌘
+CURRENT_LOADING_INDEX := 0
+
 # Colors
 DARK_PURPLE			= \x1b[38;2;179;153;250m
 PURPLE					= \x1b[38;2;196;160;250m
@@ -71,7 +75,7 @@ define display_header_section
 endef
 # Affiche la fin de section
 define close_section
-	@printf "%$(INDENT).s ╠"
+	@printf "%$(INDENT).s$(DARK_PURPLE) ╠"
 	@printf "%0.s═" `seq 1 $(shell expr $(REAL_SIZE_CMD) - 1)`
 	@printf "╣$(RESET)\n"
 endef
@@ -99,11 +103,18 @@ define list_files
 		i=$$((i + 1)); \
 	done
 endef
+# Animation de chargement
+define moon_loading
+	$(eval CURRENT_LOADING_INDEX=$(shell expr $(CURRENT_LOADING_INDEX) % $(words $(LOADING_EMOJIS)) + 1))
+	@echo -ne "\033[A"
+	@printf "\r%$(INDENT).s $(DARK_PURPLE)║ $(word $(CURRENT_LOADING_INDEX), $(LOADING_EMOJIS)) $(BOLD)COMPILING:$(RESET) $(YELLOW)%-$(shell expr $(REAL_SIZE_CMD) - 16)s$(DARK_PURPLE)║$(RESET)\n" "" $(1)
+	@sleep 0.1
+endef
 
 
 .PHONY: all BANNER FILES_STRUCTURE_SECTION PRE_CHECKS_SECTION clear re
 
-all: BANNER FILES_STRUCTURE_SECTION PRE_CHECKS_SECTION COMPILING_SECTION WARNINGS_SECTION ERRORS_SECTION SUMMARY_SECTION TESTS_SECTION
+all: BANNER FILES_STRUCTURE_SECTION PRE_CHECKS_SECTION $(OBJS) WARNINGS_SECTION ERRORS_SECTION SUMMARY_SECTION TESTS_SECTION
 
 
 BANNER:
@@ -140,11 +151,15 @@ PRE_CHECKS_SECTION:
 	@printf "%$(INDENT).s $(DARK_PURPLE)║     $(GREEN)✔$(WHITE)  %-$(shell expr $(REAL_SIZE_CMD) - 9)s$(DARK_PURPLE)║\n" "" "Source files verified."
 	@printf "%$(INDENT).s $(DARK_PURPLE)║     $(GREEN)✔$(WHITE)  %-$(shell expr $(REAL_SIZE_CMD) - 9)s$(DARK_PURPLE)║\n" "" "Libraries up to date."
 	$(call close_section)
+	$(call close_section)
+
 
 COMPILING_SECTION:
 	$(call display_header_section,🚀,COMPILATION PROCESS)
+	$(call close_section)
 
 WARNINGS_SECTION:
+	$(call close_section)
 	$(call display_header_section,🚧,WARNINGS)
 
 ERRORS_SECTION:
@@ -157,6 +172,9 @@ TESTS_SECTION:
 	$(call display_header_section,🧪,TESTS)
 
 %.o: %.c
+	$(call close_section)
+	@echo -ne "\033[A"
+	$(call moon_loading,$<)
 	@$(CC) -c $< -o $@ -L$(LIBS) -I$(MLX) $(CFLAGS) 2>/dev/null
 
 clear:
