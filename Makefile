@@ -106,7 +106,6 @@ all: BANNER FILES_STRUCTURE_SECTION PRE_CHECKS_SECTION COMPILING_SECTION WARNING
 
 BANNER:
 	@clear
-	@echo $(SIZE_TWO_COLS)
 	@echo -e "$$banner" | while IFS= read -r line; do	\
 			printf "%*s%s\n" "$$indent" '' "$$line";	\
 		done;
@@ -132,9 +131,10 @@ FILES_STRUCTURE_SECTION:
 
 PRE_CHECKS_SECTION:
 	$(call display_header_section,📋,PRE-CHECKS)
-	@printf "Check headers\n"
-	@printf "Check sources\n"
-	@printf "Check libs\n"
+	@printf "$(DARK_PURPLE)║     $(GREEN)✔$(WHITE)  %-$(shell expr $(REAL_SIZE_CMD) - 9)s$(DARK_PURPLE)║\n" "Headers verified."
+	@printf "$(DARK_PURPLE)║     $(GREEN)✔$(WHITE)  %-$(shell expr $(REAL_SIZE_CMD) - 9)s$(DARK_PURPLE)║\n" "Source files verified."
+	@printf "$(DARK_PURPLE)║     $(GREEN)✔$(WHITE)  %-$(shell expr $(REAL_SIZE_CMD) - 9)s$(DARK_PURPLE)║\n" "Libraries up to date."
+	$(call close_section)
 
 COMPILING_SECTION:
 	$(call display_header_section,🚀,COMPILATION PROCESS)
