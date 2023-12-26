@@ -29,7 +29,8 @@ LIBS					=	$(MLX)
 # UI Configuration
 CMD_SIZE				:= 100
 REAL_SIZE_CMD		=	107
-SIZE_TWO_COLS	:=	$(shell expr $(CMD_SIZE) / 2)
+SIZE_TWO_COLS		:=	$(shell expr $(CMD_SIZE) / 2)
+INDENT					= 4
 
 # Colors
 DARK_PURPLE			= \x1b[38;2;179;153;250m
@@ -63,14 +64,14 @@ export banner
 # Affiche un titre de section
 # params: EMOJI, TEXTE
 define display_header_section
-	@printf "$(DARK_PURPLE)║ %-$(REAL_SIZE_CMD)s║\n" "$(1)  $(2)"
-	@printf "╠"
+	@printf "%$(INDENT).s $(DARK_PURPLE)║ %-$(REAL_SIZE_CMD)s║\n" '' "$(1)  $(2)"
+	@printf "%$(INDENT).s ╠"
 	@printf "%0.s═" `seq 1 $(shell expr $(REAL_SIZE_CMD) - 1)`
 	@printf "╣$(RESET)\n"
 endef
 # Affiche la fin de section
 define close_section
-	@printf "╠"
+	@printf "%$(INDENT).s ╠"
 	@printf "%0.s═" `seq 1 $(shell expr $(REAL_SIZE_CMD) - 1)`
 	@printf "╣$(RESET)\n"
 endef
@@ -82,7 +83,7 @@ endef
 # Liste les fichiers sources et headers sur deux colonnes
 # params: Array_Srcs, Array_Includes
 define list_files
-	@printf "$(DARK_PURPLE)║  $(GREEN)$(BOLD)%-$(SIZE_TWO_COLS)s$(DARK_PURPLE) $(GREEN)$(BOLD)%-$(SIZE_TWO_COLS)s$(DARK_PURPLE) ║$(RESET)\n" "Sources Files:" "Includes Files:"
+	@printf "%$(INDENT).s $(DARK_PURPLE)║  $(GREEN)$(BOLD)%-$(SIZE_TWO_COLS)s$(DARK_PURPLE) $(GREEN)$(BOLD)%-$(SIZE_TWO_COLS)s$(DARK_PURPLE) ║$(RESET)\n" "" "Sources Files:" "Includes Files:"
 	$(eval max := $(call max_count,$(1),$(2))) 
 	@i=1; \
 	while [ $$i -le $(max) ]; do \
@@ -94,7 +95,7 @@ define list_files
 		if [ $$i -le $(words $(2)) ]; then \
 			include_file=`echo $(2) | cut -d' ' -f$$i`; \
 		fi; \
-		printf "$(DARK_PURPLE)║$(WHITE)   %-$(SIZE_TWO_COLS)s  %-$(SIZE_TWO_COLS)s$(DARK_PURPLE) ║\n" "$$src_file" "$$include_file"; \
+		printf "%$(INDENT).s $(DARK_PURPLE)║$(WHITE)   %-$(SIZE_TWO_COLS)s  %-$(SIZE_TWO_COLS)s$(DARK_PURPLE) ║\n" "" "$$src_file" "$$include_file"; \
 		i=$$((i + 1)); \
 	done
 endef
@@ -104,21 +105,25 @@ endef
 
 all: BANNER FILES_STRUCTURE_SECTION PRE_CHECKS_SECTION COMPILING_SECTION WARNINGS_SECTION ERRORS_SECTION SUMMARY_SECTION TESTS_SECTION
 
+
 BANNER:
 	@clear
-	@echo -e "$$banner" | while IFS= read -r line; do	\
-			printf "%*s%s\n" "$$indent" '' "$$line";	\
-		done;
-	@printf "$(DARK_PURPLE)╔"
+	@cols=120;	\
+	width=51; \
+	indent=$$((($$cols - $$width) / 2));	\
+	echo -e "$$banner" | while IFS= read -r line; do	\
+		printf "%*s%s\n" "$$indent" '' "$$line";	\
+	done;
+	@printf "%$(INDENT).s $(DARK_PURPLE)╔"
 	@printf "%0.s═" `seq 1 51`
 	@printf "╦"
 	@printf "%0.s═" `seq 1 54`
 	@printf "╗\n"
-	@printf "║ $(GREEN)%-16s$(YELLOW)$(ITALIC)%-35s$(RESET)$(DARK_PURPLE) ║ $(GREEN)%-16s$(YELLOW)$(ITALIC)%-36s$(RESET)$(DARK_PURPLE) ║\n" "• Author: " $(AUTHOR) "Project: " "$(PROJECT_NAME)"
-	@printf "║ $(GREEN)%-16s$(YELLOW)$(ITALIC)%-35s$(RESET)$(DARK_PURPLE) ║ $(GREEN)%-16s$(YELLOW)$(ITALIC)%-36s$(RESET)$(DARK_PURPLE) ║\n" "• Github: " $(GITHUB) "Version: " "$(PROJECT_VERSION)"
-	@printf "║ $(GREEN)%-16s$(YELLOW)$(ITALIC)%-35s$(RESET)$(DARK_PURPLE) ║ $(GREEN)%-16s$(YELLOW)$(ITALIC)%-36s$(RESET)$(DARK_PURPLE) ║\n" "• Compiler: " "$(COMPILER)" "OS: " "$(OS_VERSION)"
-	@printf "║ $(GREEN)%-16s$(YELLOW)$(ITALIC)%-35s$(RESET)$(DARK_PURPLE) ║ $(GREEN)%-16s$(YELLOW)$(ITALIC)%-36s$(RESET)$(DARK_PURPLE) ║\n" "• Build Type: " $(BUILD_TYPE) "Last Update: " "$(MAKEFILE_LAST_UPDATE)"
-	@printf "╠"
+	@printf "%$(INDENT).s ║ $(GREEN)%-16s$(YELLOW)$(ITALIC)%-35s$(RESET)$(DARK_PURPLE) ║ $(GREEN)%-16s$(YELLOW)$(ITALIC)%-36s$(RESET)$(DARK_PURPLE) ║\n" "" "• Author: " $(AUTHOR) "Project: " "$(PROJECT_NAME)"
+	@printf "%$(INDENT).s ║ $(GREEN)%-16s$(YELLOW)$(ITALIC)%-35s$(RESET)$(DARK_PURPLE) ║ $(GREEN)%-16s$(YELLOW)$(ITALIC)%-36s$(RESET)$(DARK_PURPLE) ║\n" "" "• Github: " $(GITHUB) "Version: " "$(PROJECT_VERSION)"
+	@printf "%$(INDENT).s ║ $(GREEN)%-16s$(YELLOW)$(ITALIC)%-35s$(RESET)$(DARK_PURPLE) ║ $(GREEN)%-16s$(YELLOW)$(ITALIC)%-36s$(RESET)$(DARK_PURPLE) ║\n" "" "• Compiler: " "$(COMPILER)" "OS: " "$(OS_VERSION)"
+	@printf "%$(INDENT).s ║ $(GREEN)%-16s$(YELLOW)$(ITALIC)%-35s$(RESET)$(DARK_PURPLE) ║ $(GREEN)%-16s$(YELLOW)$(ITALIC)%-36s$(RESET)$(DARK_PURPLE) ║\n" "" "• Build Type: " $(BUILD_TYPE) "Last Update: " "$(MAKEFILE_LAST_UPDATE)"
+	@printf "%$(INDENT).s ╠"
 	@printf "%0.s═" `seq 1 51`
 	@printf "╩"
 	@printf "%0.s═" `seq 1 54`
@@ -131,9 +136,9 @@ FILES_STRUCTURE_SECTION:
 
 PRE_CHECKS_SECTION:
 	$(call display_header_section,📋,PRE-CHECKS)
-	@printf "$(DARK_PURPLE)║     $(GREEN)✔$(WHITE)  %-$(shell expr $(REAL_SIZE_CMD) - 9)s$(DARK_PURPLE)║\n" "Headers verified."
-	@printf "$(DARK_PURPLE)║     $(GREEN)✔$(WHITE)  %-$(shell expr $(REAL_SIZE_CMD) - 9)s$(DARK_PURPLE)║\n" "Source files verified."
-	@printf "$(DARK_PURPLE)║     $(GREEN)✔$(WHITE)  %-$(shell expr $(REAL_SIZE_CMD) - 9)s$(DARK_PURPLE)║\n" "Libraries up to date."
+	@printf "%$(INDENT).s $(DARK_PURPLE)║     $(GREEN)✔$(WHITE)  %-$(shell expr $(REAL_SIZE_CMD) - 9)s$(DARK_PURPLE)║\n" "" "Headers verified."
+	@printf "%$(INDENT).s $(DARK_PURPLE)║     $(GREEN)✔$(WHITE)  %-$(shell expr $(REAL_SIZE_CMD) - 9)s$(DARK_PURPLE)║\n" "" "Source files verified."
+	@printf "%$(INDENT).s $(DARK_PURPLE)║     $(GREEN)✔$(WHITE)  %-$(shell expr $(REAL_SIZE_CMD) - 9)s$(DARK_PURPLE)║\n" "" "Libraries up to date."
 	$(call close_section)
 
 COMPILING_SECTION:
