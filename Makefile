@@ -17,9 +17,12 @@ DIST					=	build
 OBJDIR				=	#obj
 
 # Includes, sources directories and objects
-INCLUDES_DIR	=	inc
-SRCS_DIR			:=	src src/engine src/entities src/map src/window
-SRCS					:=	$(foreach dir, $(SRCS_DIR), $(wildcard $(dir)/*.c))
+INCLUDES_DIR	=	src/includes
+INCLUDES			= $(foreach dir, $(INCLUDES_DIR), $(wildcard $(dir)/*.h))
+SRCS_DIR			=	src src/engine src/entities src/map src/window
+SRCS					=	$(foreach dir, $(SRCS_DIR), $(wildcard $(dir)/*.c))
+ASSETS_DIR		= src/assets
+ASSETS				=	$(foreach dir, $(ASSETS_DIR), $(wildcard $(dir)/*))
 OBJS					:=	$(SRCS:.c=.o)
 
 # Libraries
@@ -27,7 +30,9 @@ MLX						=	src/lib/minilibx-linux
 LIBS					=	$(MLX)
 
 # General UI
-CMD_SIZE				:= 109
+CMD_SIZE				:= 100
+REAL_SIZE_CMD		=	107
+SIZE_THREE_COLS	:=	$(shell expr $(CMD_SIZE) / 3)
 
 # UI Progress Bar
 #	SRCS
@@ -37,10 +42,14 @@ FILENAME				:= ""
 # Colors
 DARK_PURPLE			= \x1b[38;2;179;153;250m
 PURPLE					= \x1b[38;2;196;160;250m
+RED							= \x1b[38;2;219;94;115m
 LIGHT_PURPLE		= \x1b[38;2;216;177;250m
 GREEN						= \x1b[38;2;202;250;166m
 YELLOW					= \x1b[38;2;250;235;185m
+WHITE						= \x1b[38;2;255;255;255m
 RESET						= \x1b[0;0m
+BOLD						= \x1b[1m
+ITALIC					= \x1b[3m
 
 # UI Emoji
 CHECK						=	✔
@@ -57,36 +66,74 @@ $(LIGHT_PURPLE) ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═�
 endef
 export banner
 
-all: BANNER
+max_length=$${#srcs[@]}; \
+[ $${#includes[@]} -gt $$max_len ] && max_len=$${#includes[@]}; \
+[ $${#assets[@]} -gt $$max_len ] && max_len=$${#assets[@]}; \
+echo $$max_len)
+
+min_length = $(shell srcs=($(1)); includes=($(2)); \
+	if [ $${#srcs[@]} -lt $${#includes[@]} ]; then echo $${#srcs[@]}; \
+	else echo $${#includes[@]}; fi)
+
+all: BANNER LIST_FILES
 
 BANNER:
 	@clear
+	@echo $(SIZE_TWO_COLS)
 	@echo -e "$$banner" | while IFS= read -r line; do	\
 			printf "%*s%s\n" "$$indent" '' "$$line";	\
 		done;
 	@printf "$(DARK_PURPLE)╔"
 	@printf "%0.s═" `seq 1 51`
 	@printf "╦"
-	@printf "%0.s═" `seq 1 53`
+	@printf "%0.s═" `seq 1 54`
 	@printf "╗\n"
-	@printf "║ $(GREEN)%-16s$(YELLOW)%-35s$(DARK_PURPLE) ║ $(GREEN)%-16s$(YELLOW)%-35s$(DARK_PURPLE) ║\n" "• Author: " $(AUTHOR) "Project: " "$(PROJECT_NAME)"
-	@printf "║ $(GREEN)%-16s$(YELLOW)%-35s$(DARK_PURPLE) ║ $(GREEN)%-16s$(YELLOW)%-35s$(DARK_PURPLE) ║\n" "• Github: " $(GITHUB) "Version: " "$(PROJECT_VERSION)"
-	@printf "║ $(GREEN)%-16s$(YELLOW)%-35s$(DARK_PURPLE) ║ $(GREEN)%-16s$(YELLOW)%-35s$(DARK_PURPLE) ║\n" "• Compiler: " "$(COMPILER)" "OS: " "$(OS_VERSION)"
-	@printf "║ $(GREEN)%-16s$(YELLOW)%-35s$(DARK_PURPLE) ║ $(GREEN)%-16s$(YELLOW)%-35s$(DARK_PURPLE) ║\n" "• Build Type: " $(BUILD_TYPE) "Last Update: " "$(MAKEFILE_LAST_UPDATE)"
-	@printf "╚"
+	@printf "║ $(GREEN)%-16s$(YELLOW)$(ITALIC)%-35s$(RESET)$(DARK_PURPLE) ║ $(GREEN)%-16s$(YELLOW)$(ITALIC)%-36s$(RESET)$(DARK_PURPLE) ║\n" "• Author: " $(AUTHOR) "Project: " "$(PROJECT_NAME)"
+	@printf "║ $(GREEN)%-16s$(YELLOW)$(ITALIC)%-35s$(RESET)$(DARK_PURPLE) ║ $(GREEN)%-16s$(YELLOW)$(ITALIC)%-36s$(RESET)$(DARK_PURPLE) ║\n" "• Github: " $(GITHUB) "Version: " "$(PROJECT_VERSION)"
+	@printf "║ $(GREEN)%-16s$(YELLOW)$(ITALIC)%-35s$(RESET)$(DARK_PURPLE) ║ $(GREEN)%-16s$(YELLOW)$(ITALIC)%-36s$(RESET)$(DARK_PURPLE) ║\n" "• Compiler: " "$(COMPILER)" "OS: " "$(OS_VERSION)"
+	@printf "║ $(GREEN)%-16s$(YELLOW)$(ITALIC)%-35s$(RESET)$(DARK_PURPLE) ║ $(GREEN)%-16s$(YELLOW)$(ITALIC)%-36s$(RESET)$(DARK_PURPLE) ║\n" "• Build Type: " $(BUILD_TYPE) "Last Update: " "$(MAKEFILE_LAST_UPDATE)"
+	@printf "╠"
 	@printf "%0.s═" `seq 1 51`
 	@printf "╩"
-	@printf "%0.s═" `seq 1 53`
-	@printf "╝$(RESET)\n"
+	@printf "%0.s═" `seq 1 54`
+	@printf "╣$(RESET)\n"
 
-CHECK_FILES:
-		@printf "📋 CHECKING FILES:\n"
+LIST_FILES: FILES_STRUCTURE_SECTION PRE_CHECKS_SECTION
 
-CHECK_HEADERS:
-		@printf "\t%*s[%s] Checking headers files in the %s folder\n" "$$indent" '' $(CHECK) $(INCLUDES_DIR)
+FILES_STRUCTURE_SECTION:
+	@printf "$(DARK_PURPLE)║ %-$(REAL_SIZE_CMD)s║\n" " FILE STRUCTURE"
+	@printf "╠"
+	@printf "%0.s═" `seq 1 $(shell expr $(REAL_SIZE_CMD) - 1)`
+	@printf "╣$(RESET)\n"
+	@printf "$(DARK_PURPLE)║  $(GREEN)$(BOLD)%-$(SIZE_THREE_COLS)s$(DARK_PURPLE) $(GREEN)$(BOLD)%-$(SIZE_THREE_COLS)s$(DARK_PURPLE) $(GREEN)$(BOLD)%-$(SIZE_THREE_COLS)s$(DARK_PURPLE)║$(RESET)\n" "Sources Files:" "Includes Files:" "Assets Files:"
+	@srcs=($(SRCS)); \
+	includes=($(INCLUDES)); \
+	assets=($(ASSETS)); \
+	max=20; \
+	i=0; \
+	while [ $$i -lt $$max ]; do \
+		src=`echo $${srcs[@]:$$i:1}`; \
+		include=`echo $${includes[@]:$$i:1}`; \
+		asset=`echo $${assets[@]:$$i:1}`; \
+		[ -z "$$src" ] && src=" "; \
+		[ -z "$$include" ] && include=" "; \
+		[ -z "$$asset" ] && asset=" "; \
+		printf "$(DARK_PURPLE)║$(WHITE)   %-$(SIZE_THREE_COLS)s  %-$(SIZE_THREE_COLS)s  %-$(SIZE_THREE_COLS)s$(DARK_PURPLE)║\n" "$$src" "$$include" "$$asset"; \
+		i=`expr $$i + 1`; \
+	done; \
+	[ `echo $${srcs[@]} | wc -w` -gt 20 ] && printf "║   %-$(SIZE_THREE_COLS)s║" "+"; \
+	[ `echo $${includes[@]} | wc -w` -gt 20 ] && printf "║   %-$(SIZE_THREE_COLS)s  %-$(SIZE_THREE_COLS)s║" "" "+"; \
+	[ `echo $${assets[@]} | wc -w` -gt 20 ] && printf "║$(RED)   %-$(SIZE_THREE_COLS)s  %-$(SIZE_THREE_COLS)s  %-$(SIZE_THREE_COLS)s$(DARK_PURPLE)║" "" "" "+"; \
+	([ `echo $${srcs[@]} | wc -w` -gt 20 ] || [ `echo $${includes[@]} | wc -w` -gt 20 ] || [ `echo $${assets[@]} | wc -w` -gt 20 ]) && printf "\n";
+	@printf "╠"
+	@printf "%0.s═" `seq 1 $(shell expr $(REAL_SIZE_CMD) - 1)`
+	@printf "╣\n"
 
-CHECK_SRCS:
-		@printf "\t%*s[%s] Checking sources files in the %s folder\n" "$$indent" '' $(CHECK) $(SRCS_DIR)
+PRE_CHECKS_SECTION:
+	@printf "$(DARK_PURPLE)║ %-$(REAL_SIZE_CMD)s║\n" "📋 PRE-CHECKS"
+	@printf "╠"
+	@printf "%0.s═" `seq 1 $(shell expr $(REAL_SIZE_CMD) - 1)`
+	@printf "╣$(RESET)\n"
 
 %.o: %.c
 	@$(CC) -c $< -o $@ -L$(LIBS) -I$(MLX) $(CFLAGS) 2>/dev/null
@@ -95,6 +142,9 @@ clear:
 	@rm -rf $(OBJS)
 
 re: clear all
+
+
+
 
 
 #define update_progress
