@@ -35,6 +35,7 @@ INDENT					= 4
 # Loading
 LOADING_EMOJIS := 🌑 🌒 🌓 🌔 🌕 🌖 🌗 🌘
 CURRENT_LOADING_INDEX := 0
+CURRENT_INDEX					:= 0
 
 # Colors
 DARK_PURPLE			= \x1b[38;2;179;153;250m
@@ -104,12 +105,28 @@ define list_files
 	done
 endef
 # Animation de chargement
+# params Nom_de_fichier_actuel
 define moon_loading
 	$(eval CURRENT_LOADING_INDEX=$(shell expr $(CURRENT_LOADING_INDEX) % $(words $(LOADING_EMOJIS)) + 1))
 	@echo -ne "\033[A"
 	@printf "\r%$(INDENT).s $(DARK_PURPLE)║ $(word $(CURRENT_LOADING_INDEX), $(LOADING_EMOJIS)) $(BOLD)COMPILING:$(RESET) $(YELLOW)%-$(shell expr $(REAL_SIZE_CMD) - 16)s$(DARK_PURPLE)║$(RESET)\n" "" $(1)
 	@sleep 0.1
 endef
+# Barre de progression
+# params nombre_total_fichiers, width, current_index
+define progress_bar
+    $(eval TOTAL_FILES=$(1))
+    $(eval MAX_BAR_LENGTH=$(2))
+    $(eval CURRENT_INDEX=$(shell expr $(CURRENT_INDEX) + 1))
+		$(eval FILLED_LENGTH := $(if $(filter $(CURRENT_INDEX),$(TOTAL_FILES)), $(MAX_BAR_LENGTH), $(shell expr $(CURRENT_INDEX) \* $(MAX_BAR_LENGTH) / $(TOTAL_FILES))))
+    $(eval FILLED_PROGRESS_BAR=$(shell printf "%0.s█" $(shell seq 1 $(FILLED_LENGTH))))
+		$(eval EMPTY_PROGRESS_BAR=$(shell if [ "$(CURRENT_INDEX)" -eq "$(TOTAL_FILES)" ]; then printf "%0.s" ""; else printf "%0.s░" $(shell seq 1 $(shell expr $(MAX_BAR_LENGTH) - $(FILLED_LENGTH))); fi))
+    $(eval TEXT_PROGRESS_BAR=$(shell printf "[%s%s]" "$(FILLED_PROGRESS_BAR)" "$(EMPTY_PROGRESS_BAR)"))
+    @printf "\r%$(INDENT).s $(DARK_PURPLE)║"
+    @printf "\t  %-$(shell expr $(REAL_SIZE_CMD) - 5)s \t\t\t" $(TEXT_PROGRESS_BAR)
+    @printf "║"
+endef
+
 
 
 .PHONY: all BANNER FILES_STRUCTURE_SECTION PRE_CHECKS_SECTION clear re
@@ -118,6 +135,7 @@ all: BANNER FILES_STRUCTURE_SECTION PRE_CHECKS_SECTION $(OBJS) WARNINGS_SECTION 
 
 
 BANNER:
+	@echo -ne "\x1b[?25l"
 	@clear
 	@cols=120;	\
 	width=51; \
@@ -159,6 +177,7 @@ COMPILING_SECTION:
 	$(call close_section)
 
 WARNINGS_SECTION:
+	@echo -ne "\n"
 	$(call close_section)
 	$(call display_header_section,🚧,WARNINGS)
 
@@ -170,11 +189,14 @@ SUMMARY_SECTION:
 
 TESTS_SECTION:
 	$(call display_header_section,🧪,TESTS)
+	@echo -ne "\x1b[?25h"
 
 %.o: %.c
+	@echo -ne "\033[E"
 	$(call close_section)
-	@echo -ne "\033[A"
+	@echo -ne "\033[2A"
 	$(call moon_loading,$<)
+	$(call progress_bar,$(words $(SRCS)),75)
 	@$(CC) -c $< -o $@ -L$(LIBS) -I$(MLX) $(CFLAGS) 2>/dev/null
 
 clear:
