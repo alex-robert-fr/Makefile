@@ -1,6 +1,6 @@
 # Compiler options
 CC						:=	gcc
-CFLAGS				=	#-Wall -Wextra -Werror -pedantic
+CFLAGS				=	-Wall -Wextra -pedantic
 
 # Project Informations
 AUTHOR									=	0x7c00
@@ -21,6 +21,8 @@ INCLUDES			= $(foreach dir, $(INCLUDES_DIR), $(wildcard $(dir)/*.h))
 SRCS					=	$(foreach dir, $(SRCS_DIR), $(wildcard $(dir)/*.c))
 ASSETS				=	$(foreach dir, $(ASSETS_DIR), $(wildcard $(dir)/*))
 OBJS					:=	$(SRCS:.c=.o)
+WARNING_LOGS	= warnings.log
+
 
 # Libraries
 MLX						=	src/lib/minilibx-linux
@@ -44,6 +46,7 @@ RED							= \x1b[38;2;219;94;115m
 LIGHT_PURPLE		= \x1b[38;2;216;177;250m
 GREEN						= \x1b[38;2;202;250;166m
 YELLOW					= \x1b[38;2;250;235;185m
+DARK_YELLOW			= \x1b[38;2;250;235;135m
 WHITE						= \x1b[38;2;255;255;255m
 RESET						= \x1b[0;0m
 BOLD						= \x1b[1m
@@ -110,7 +113,6 @@ define moon_loading
 	$(eval CURRENT_LOADING_INDEX=$(shell expr $(CURRENT_LOADING_INDEX) % $(words $(LOADING_EMOJIS)) + 1))
 	@echo -ne "\033[A"
 	@printf "\r%$(INDENT).s $(DARK_PURPLE)║ $(word $(CURRENT_LOADING_INDEX), $(LOADING_EMOJIS)) $(BOLD)COMPILING:$(RESET) $(YELLOW)%-$(shell expr $(REAL_SIZE_CMD) - 16)s$(DARK_PURPLE)║$(RESET)\n" "" $(1)
-	@sleep 0.1
 endef
 # Barre de progression
 # params nombre_total_fichiers, width, current_index
@@ -126,6 +128,40 @@ define progress_bar
     @printf "\t  %-$(shell expr $(REAL_SIZE_CMD) - 5)s \t\t\t" $(TEXT_PROGRESS_BAR)
     @printf "║"
 endef
+# Met en formes les erreur GCC UNIQUEMENT !
+define display_warning
+	@warning_logs=$(WARNING_LOGS); \
+	if [ ! -s "$$warning_logs" ]; then \
+		echo "Aucun avertissement de compilation trouvé."; \
+	else \
+		while IFS= read -r line; do \
+			if echo "$$line" | grep -q -E '^[^[:space:]]+/.+:[0-9]+:[0-9]+:'; then \
+				file_and_line=$$(echo "$$line" | cut -d ':' -f 1-3); \
+				message=$$(echo "$$line" | cut -d ':' -f 5-); \
+				printf "%$(INDENT).s $(DARK_PURPLE)║$(RESET) $(LIGHT_PURPLE)$(BOLD)%-104s$(RESET) $(DARK_PURPLE)║$(RESET)\n" "" "$$file_and_line"; \
+				is_first_line=true;\
+				echo "$$message" | fold -s -w 95 | while IFS= read -r text_line; do \
+					trim_text_line=$$(echo "$$text_line" | awk '{$$1=$$1;print}');\
+					words_count=$$(echo -n "$$trim_text_line" | wc -m); \
+					padding_size=$$(expr $(REAL_SIZE_CMD) - $$words_count); \
+					if [ "$$is_first_line" = true ]; then \
+						printf "%$(INDENT).s $(DARK_PURPLE)║$(RESET)  $(DARK_YELLOW) $(RESET) %-s%*s$(DARK_PURPLE)║$(RESET)\n" "" "$$trim_text_line" $$(expr $$padding_size - 6) ""; \
+						is_first_line=false; \
+					else \
+						printf "%$(INDENT).s $(DARK_PURPLE)║$(RESET)   %-s%*s$(DARK_PURPLE)║$(RESET)\n" "" "$$trim_text_line" $$(expr $$padding_size - 4) ""; \
+					fi; \
+				done; \
+				printf "%$(INDENT).s $(DARK_PURPLE)║$(RESET)%*s$(DARK_PURPLE)║$(RESET)\n" "" "$$(expr $(REAL_SIZE_CMD) - 1)";\
+			fi \
+		done < "$$warning_logs"; \
+	fi
+endef
+
+
+
+
+
+
 
 
 
@@ -180,6 +216,9 @@ WARNINGS_SECTION:
 	@echo -ne "\n"
 	$(call close_section)
 	$(call display_header_section,🚧,WARNINGS)
+	$(call display_warning)
+	$(call close_section)
+	@rm -rf $(WARNING_LOGS)
 
 ERRORS_SECTION:
 	$(call display_header_section,💥,ERRORS)
@@ -197,7 +236,7 @@ TESTS_SECTION:
 	@echo -ne "\033[2A"
 	$(call moon_loading,$<)
 	$(call progress_bar,$(words $(SRCS)),75)
-	@$(CC) -c $< -o $@ -L$(LIBS) -I$(MLX) $(CFLAGS) 2>/dev/null
+	@$(CC) -c $< -o $@ -L$(LIBS) -I$(MLX) $(CFLAGS) 2>> $(WARNING_LOGS)
 
 clear:
 	@rm -rf $(OBJS)
