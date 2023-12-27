@@ -1,12 +1,35 @@
+_PROJECT_NAME			=	Makefile
+_PROJECT_VERSION	=	1.0.0
+_INCLUDES_DIR			=	-Isrc/includes -Isrc/lib/minilibx-linux
+_SRCS_DIR					=	src src/engine src/entities src/map src/window
+_LIBS_DIR					=	-Lsrc/lib/minilibx-linux
+_LIBS_FLAGS				=	
+_CFLAGS						= 
+
+	
+
+
+
+
+
+
+
+
+
+
+
+
+
+# NE PAS TOUCHER !!!
 # Compiler options
 CC						:=	gcc
-CFLAGS				=	-Wall -Wextra -pedantic
+CFLAGS				= $(_LIBS_FLAGS) -Wall -Wextra $(_CFLAGS)
 
 # Project Informations
 AUTHOR									=	0x7c00
-PROJECT_NAME						=	Makefile
+PROJECT_NAME						=	$(_PROJECT_NAME)
 GITHUB									=	https://github.com/alex-robert-fr
-PROJECT_VERSION					= 1.0.0
+PROJECT_VERSION					= $(_PROJECT_VERSION)
 COMPILER								= $(shell $(CC) --version | head -n 1 | awk '{print toupper($$1), $$3}')
 OS_VERSION							= $(shell lsb_release -si; lsb_release -sr)
 BUILD_TYPE							= Debug
@@ -14,19 +37,16 @@ MAKEFILE_LAST_UPDATE		:= $(shell date -d "$(shell stat -c %y Makefile)" +'%Y-%m-
 
 #	Directories and Files
 DIST					=	build
-INCLUDES_DIR	=	src/includes
-SRCS_DIR			=	src src/engine src/entities src/map src/window
-ASSETS_DIR		= src/assets
+INCLUDES_DIR	=	$(_INCLUDES_DIR)
+SRCS_DIR			=	$(_SRCS_DIR)
 INCLUDES			= $(foreach dir, $(INCLUDES_DIR), $(wildcard $(dir)/*.h))
 SRCS					=	$(foreach dir, $(SRCS_DIR), $(wildcard $(dir)/*.c))
-ASSETS				=	$(foreach dir, $(ASSETS_DIR), $(wildcard $(dir)/*))
 OBJS					:=	$(SRCS:.c=.o)
 WARNING_LOGS	= warnings.log
 
 
 # Libraries
-MLX						=	src/lib/minilibx-linux
-LIBS					=	$(MLX)
+LIBS					=	$(_LIBS_DIR)
 
 # UI Configuration
 CMD_SIZE				:= 100
@@ -236,7 +256,7 @@ TESTS_SECTION:
 	@echo -ne "\033[2A"
 	$(call moon_loading,$<)
 	$(call progress_bar,$(words $(SRCS)),75)
-	@$(CC) -c $< -o $@ -L$(LIBS) -I$(MLX) $(CFLAGS) 2>> $(WARNING_LOGS)
+	@$(CC) -c $< -o $@ $(LIBS) $(INCLUDES_DIR) $(CFLAGS) 2>> $(WARNING_LOGS)
 
 clear:
 	@rm -rf $(OBJS)
