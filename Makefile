@@ -20,7 +20,6 @@ _CFLAGS						=
 
 
 
-
 # NE PAS TOUCHER !!!
 # Compiler options
 CC						:=	gcc
@@ -46,6 +45,7 @@ OBJS					:=	$(SRCS:.c=.o)
 WARNING_LOGS	= warnings.tmp.log
 ERROR_LOGS		= error.tmp.log
 ERROR_COUNT		= error_count.tmp
+TIME_TMP			=	time.tmp
 
 
 # Libraries
@@ -107,6 +107,11 @@ define close_section
 	@printf "%0.s═" `seq 1 $(shell expr $(REAL_SIZE_CMD) - 1)`
 	@printf "╣$(RESET)\n"
 endef
+define close_page
+	@printf "%$(INDENT).s$(DARK_PURPLE) ╚"
+	@printf "%0.s═" `seq 1 $(shell expr $(REAL_SIZE_CMD) - 1)`
+	@printf "╝$(RESET)\n"
+endef
 # Retourne le nombre le plus grand
 # params: Array1, Array2
 define max_count
@@ -144,12 +149,13 @@ define progress_bar
     $(eval TOTAL_FILES=$(1))
     $(eval MAX_BAR_LENGTH=$(2))
     $(eval CURRENT_INDEX=$(shell expr $(CURRENT_INDEX) + 1))
+		$(eval PERCENT=$(shell expr $(CURRENT_INDEX) \* 100 / $(TOTAL_FILES)))
 		$(eval FILLED_LENGTH := $(if $(filter $(CURRENT_INDEX),$(TOTAL_FILES)), $(MAX_BAR_LENGTH), $(shell expr $(CURRENT_INDEX) \* $(MAX_BAR_LENGTH) / $(TOTAL_FILES))))
     $(eval FILLED_PROGRESS_BAR=$(shell printf "%0.s█" $(shell seq 1 $(FILLED_LENGTH))))
 		$(eval EMPTY_PROGRESS_BAR=$(shell if [ "$(CURRENT_INDEX)" -eq "$(TOTAL_FILES)" ]; then printf "%0.s" ""; else printf "%0.s░" $(shell seq 1 $(shell expr $(MAX_BAR_LENGTH) - $(FILLED_LENGTH))); fi))
     $(eval TEXT_PROGRESS_BAR=$(shell printf "[%s%s]" "$(FILLED_PROGRESS_BAR)" "$(EMPTY_PROGRESS_BAR)"))
     @printf "\r%$(INDENT).s $(DARK_PURPLE)║"
-    @printf "\t  %-$(shell expr $(REAL_SIZE_CMD) - 5)s \t\t\t" $(TEXT_PROGRESS_BAR)
+    @printf "\t  %-$(shell expr $(REAL_SIZE_CMD))s %s%% \t\t\t" $(TEXT_PROGRESS_BAR) $(PERCENT)
     @printf "║"
 endef
 # Met en formes les erreur GCC UNIQUEMENT !
@@ -160,12 +166,11 @@ define display_warning
 		printf "%$(INDENT).s $(DARK_PURPLE)║$(RESET) Aucun avertissement de compilation trouvé.%*s$(DARK_PURPLE)║$(RESET)\n" "" "63"; \
 	else \
 		while IFS= read -r line; do \
-			if echo "$$line" | grep -q -E '^[^[:space:]]+/.+:[0-9]+:[0-9]+: $(2):'; then \
 				file_and_line=$$(echo "$$line" | cut -d ':' -f 1-3); \
 				message=$$(echo "$$line" | cut -d ':' -f 5-); \
 				printf "%$(INDENT).s $(DARK_PURPLE)║$(RESET) $(LIGHT_PURPLE)$(BOLD)%-104s$(RESET) $(DARK_PURPLE)║$(RESET)\n" "" "$$file_and_line"; \
 				is_first_line=true;\
-				echo "$$message" | fold -s -w 95 | while IFS= read -r text_line; do \
+				echo "$$message" | fold -s -w 100 | while IFS= read -r text_line; do \
 					trim_text_line=$$(echo "$$text_line" | awk '{$$1=$$1;print}');\
 					words_count=$$(echo -n "$$trim_text_line" | wc -m); \
 					padding_size=$$(expr $(REAL_SIZE_CMD) - $$words_count); \
@@ -177,7 +182,6 @@ define display_warning
 					fi; \
 				done; \
 				printf "%$(INDENT).s $(DARK_PURPLE)║$(RESET)%*s$(DARK_PURPLE)║$(RESET)\n" "" "$$(expr $(REAL_SIZE_CMD) - 1)";\
-			fi \
 		done < "$$warning_logs"; \
 	fi
 endef
@@ -192,7 +196,20 @@ endef
 
 .PHONY: all BANNER FILES_STRUCTURE_SECTION PRE_CHECKS_SECTION clear re
 
-all: CREATE_TMP BANNER FILES_STRUCTURE_SECTION PRE_CHECKS_SECTION $(OBJS) WARNINGS_SECTION ERRORS_SECTION SUMMARY_SECTION TESTS_SECTION REMOVE_TMP
+all: record_start_time CREATE_TMP BANNER FILES_STRUCTURE_SECTION PRE_CHECKS_SECTION $(OBJS) WARNINGS_SECTION ERRORS_SECTION record_end_time SUMMARY_SECTION REMOVE_TMP 
+
+record_start_time:
+	@echo $$(date '+%s%N') > start_time.log
+
+record_end_time:
+	@end_time=$$(date '+%s%N'); \
+	start_time=$$(cat start_time.log); \
+	duration_ns=$$((end_time - start_time)); \
+	duration_sec=$$((duration_ns / 1000000000)); \
+	duration_ms=$$((duration_ns % 1000000000)); \
+	total=$$(echo "scale=2; ($$duration_ms / 1000000000)" | bc); \
+	echo "$$duration_sec$$total" > $(TIME_TMP)
+
 
 CREATE_TMP:
 	@echo 0 > $(ERROR_COUNT)
@@ -201,10 +218,12 @@ REMOVE_TMP:
 	@rm -rf $(WARNING_LOGS)
 	@rm -rf $(ERROR_COUNT)
 	@rm -rf $(ERROR_LOGS)
+	@rm -rf $(TIME_TMP)
+	@rm -rf temp start_time.log build_time.log
 
 FILTER_LOGS:
 	@grep "attention:" $(ERROR_LOGS) > $(WARNING_LOGS) || true
-	@grep -v "attention:" $(ERROR_LOGS) > temp && mv temp $(ERROR_LOGS) || true
+	@grep "erreur:" $(ERROR_LOGS) > temp && mv temp $(ERROR_LOGS) || true
 
 BANNER:
 	@echo -ne "\x1b[?25l"
@@ -262,10 +281,12 @@ ERRORS_SECTION:
 
 SUMMARY_SECTION:
 	$(call display_header_section,📊,BUILD SUMMARY,0)
+	@printf "%$(INDENT).s $(DARK_PURPLE)║$(RESET)     Files Compiled: %s\tWarnings: %s\tErrors: %s\tTime: %ss%-$(shell expr $(REAL_SIZE_CMD) - 71)s$(DARK_PURPLE) ║\n" "" $$(expr $(TOTAL_FILES) - `cat $(ERROR_COUNT)`) $$(wc -l < $(WARNING_LOGS)) $$(wc -l < $(ERROR_LOGS) | awk '{print $$1}') $$(cat $(TIME_TMP))
+	$(call close_page)
+	@echo -ne "\x1b[?25h"
 
 TESTS_SECTION:
 	$(call display_header_section,🧪,TESTS,0)
-	@echo -ne "\x1b[?25h"
 
 %.o: %.c
 	@echo -ne "\033[E"
@@ -273,7 +294,7 @@ TESTS_SECTION:
 	@echo -ne "\033[2A"
 	$(call moon_loading,$<)
 	$(call progress_bar,$(words $(SRCS)),75)
-	@if ! $(CC) -c $< -o $@ $(LIBS) $(INCLUDES_DIR) $(CFLAGS) 2>> $(ERROR_LOGS); then \
+	@if ! $(CC) -c $< -o $@ $(LIBS) $(CFLAGS) 2>> $(ERROR_LOGS); then \
 		expr `cat $(ERROR_COUNT)` + 1 > $(ERROR_COUNT);\
 	fi
 
@@ -281,3 +302,5 @@ clear:
 	@rm -rf $(OBJS)
 
 re: clear all
+
+
