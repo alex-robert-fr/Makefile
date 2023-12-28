@@ -248,7 +248,7 @@ ERRORS_SECTION:
 
 SUMMARY_SECTION:
 	$(call display_header_section,📊,BUILD SUMMARY,0)
-	@printf "%$(INDENT).s $(DARK_PURPLE)║$(RESET)     Files Compiled: %s\tWarnings: %s\tErrors: %s\tTime: %ss%-$(shell expr $(REAL_SIZE_CMD) - 71)s$(DARK_PURPLE) ║\n" "" $$(expr $(TOTAL_FILES) - `cat $(ERROR_COUNT)`) $$(wc -l < $(WARNING_LOGS)) $$(wc -l < $(ERROR_LOGS) | awk '{print $$1}') $$(cat $(TIME_TMP))
+	@printf "%$(INDENT).s $(DARK_PURPLE)║$(RESET)     $(GREEN)Files Compiled: $(WHITE)$(BOLD)%s\t$(DARK_YELLOW)Warnings: $(WHITE)$(BOLD)%s\t$(DARK_RED)Errors: $(WHITE)$(BOLD)%s\t$(LIGHT_PURPLE)Time: $(WHITE)$(BOLD)%ss%-$(shell expr $(REAL_SIZE_CMD) - 71)s$(DARK_PURPLE) ║\n" "" $$(expr $(TOTAL_FILES) - `cat $(ERROR_COUNT)`) $$(wc -l < $(WARNING_LOGS)) $$(wc -l < $(ERROR_LOGS) | awk '{print $$1}') $$(cat $(TIME_TMP))
 	$(call close_page)
 	@echo -ne "\x1b[?25h"
 
