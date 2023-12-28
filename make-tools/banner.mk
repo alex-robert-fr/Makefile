@@ -1,5 +1,5 @@
 BANNER:
-	@echo -ne "\x1b[?25l"
+	$(call hidden_cursor)
 	@clear
 	@cols=120;	\
 	width=51; \

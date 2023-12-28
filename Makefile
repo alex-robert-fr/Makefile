@@ -13,7 +13,7 @@
 
 # NE PAS TOUCHER !!!
 
-include make-tools/config.mk
+include make-tools/project-config.mk	# Configuration de projet
 # Compiler options
 CC						:=	gcc
 CFLAGS				= $(_INCLUDES_FLAGS) $(_LIBS_FLAGS) -Wall -Wextra $(_CFLAGS)
@@ -84,6 +84,8 @@ $(LIGHT_PURPLE) ╚═════╝ ╚═╝  ╚═╝   ╚═╝   ╚═�
 	
 endef
 export banner
+
+include make-tools/cursor.mk
 
 # Function Definition
 # Affiche un titre de section
