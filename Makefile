@@ -1,26 +1,19 @@
-_PROJECT_NAME			=	Makefile
-_PROJECT_VERSION	=	1.0.0
-_INCLUDES_DIR			=	src/includes
-_SRCS_DIR					=	src src/engine src/entities src/map src/window
-_LIBS_DIR					=	-Lsrc/lib/minilibx-linux
-_INCLUDES_FLAGS		=	-Isrc/includes -Isrc/lib/minilibx-linux
-_LIBS_FLAGS				=	
-_CFLAGS						= 
-
-	
-
-
-
-
-
-
-
+#_PROJECT_NAME			=	progect_name
+#_PROJECT_VERSION		=	1.0.0
+#_INCLUDES_DIR			=	src/includes
+#_SRCS_DIR					=	src src/folder1 src/folder2
+#_LIBS_DIR					=	-Lsrc/lib
+#_INCLUDES_FLAGS		=	-Isrc/includes
+#_LIBS_FLAGS				=	-lglfw -lm
+#_CFLAGS						= -pendantic
 
 
 
 
 
 # NE PAS TOUCHER !!!
+
+include config.mk
 # Compiler options
 CC						:=	gcc
 CFLAGS				= $(_INCLUDES_FLAGS) $(_LIBS_FLAGS) -Wall -Wextra $(_CFLAGS)
@@ -192,10 +185,6 @@ endef
 
 
 
-
-
-.PHONY: all BANNER FILES_STRUCTURE_SECTION PRE_CHECKS_SECTION clear re
-
 all: record_start_time CREATE_TMP BANNER FILES_STRUCTURE_SECTION PRE_CHECKS_SECTION $(OBJS) WARNINGS_SECTION ERRORS_SECTION record_end_time SUMMARY_SECTION REMOVE_TMP 
 
 record_start_time:
@@ -297,6 +286,9 @@ TESTS_SECTION:
 	@if ! $(CC) -c $< -o $@ $(LIBS) $(CFLAGS) 2>> $(ERROR_LOGS); then \
 		expr `cat $(ERROR_COUNT)` + 1 > $(ERROR_COUNT);\
 	fi
+
+update:
+	@curl https://raw.githubusercontent.com/alex-robert-fr/Makefile/master/Makefile -o Makefile
 
 clear:
 	@rm -rf $(OBJS)
