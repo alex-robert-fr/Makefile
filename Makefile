@@ -266,7 +266,7 @@ TESTS_SECTION:
 	fi
 
 update:
-	@curl https://raw.githubusercontent.com/alex-robert-fr/Makefile/master/Makefile -o Makefile
+	@./make-tools/update.sh
 
 clear:
 	@rm -rf $(OBJS)
