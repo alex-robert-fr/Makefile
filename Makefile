@@ -42,7 +42,9 @@ SRCS_DIR			=	$(_SRCS_DIR)
 INCLUDES			= $(foreach dir, $(INCLUDES_DIR), $(wildcard $(dir)/*.h))
 SRCS					=	$(foreach dir, $(SRCS_DIR), $(wildcard $(dir)/*.c))
 OBJS					:=	$(SRCS:.c=.o)
-WARNING_LOGS	= warnings.log
+WARNING_LOGS	= warnings.tmp.log
+ERROR_LOGS		= error.tmp.log
+ERROR_COUNT		= error_count.tmp
 
 
 # Libraries
@@ -63,6 +65,7 @@ CURRENT_INDEX					:= 0
 DARK_PURPLE			= \x1b[38;2;179;153;250m
 PURPLE					= \x1b[38;2;196;160;250m
 RED							= \x1b[38;2;219;94;115m
+DARK_RED				= \x1b[38;2;240;64;65m
 LIGHT_PURPLE		= \x1b[38;2;216;177;250m
 GREEN						= \x1b[38;2;202;250;166m
 YELLOW					= \x1b[38;2;250;235;185m
@@ -90,9 +93,9 @@ export banner
 
 # Function Definition
 # Affiche un titre de section
-# params: EMOJI, TEXTE
+# params: EMOJI, TEXTE, Margin
 define display_header_section
-	@printf "%$(INDENT).s $(DARK_PURPLE)║ %-$(REAL_SIZE_CMD)s║\n" '' "$(1)  $(2)"
+	@printf "%$(INDENT).s $(DARK_PURPLE)║ $(WHITE)$(BOLD)%-$(shell expr $(REAL_SIZE_CMD) + $(3))s$(RESET)$(DARK_PURPLE)║\n" '' "$(1)  $(2)"
 	@printf "%$(INDENT).s ╠"
 	@printf "%0.s═" `seq 1 $(shell expr $(REAL_SIZE_CMD) - 1)`
 	@printf "╣$(RESET)\n"
@@ -149,13 +152,14 @@ define progress_bar
     @printf "║"
 endef
 # Met en formes les erreur GCC UNIQUEMENT !
+# params fichier_logs, type_a_rechercher, couleur_icone, count
 define display_warning
-	@warning_logs=$(WARNING_LOGS); \
-	if [ ! -s "$$warning_logs" ]; then \
-		echo "Aucun avertissement de compilation trouvé."; \
+	@warning_logs=$(1); \
+	if [ $(4) -eq 0 ]; then \
+		printf "%$(INDENT).s $(DARK_PURPLE)║$(RESET) Aucun avertissement de compilation trouvé.%*s$(DARK_PURPLE)║$(RESET)\n" "" "63"; \
 	else \
 		while IFS= read -r line; do \
-			if echo "$$line" | grep -q -E '^[^[:space:]]+/.+:[0-9]+:[0-9]+:'; then \
+			if echo "$$line" | grep -q -E '^[^[:space:]]+/.+:[0-9]+:[0-9]+: $(2):'; then \
 				file_and_line=$$(echo "$$line" | cut -d ':' -f 1-3); \
 				message=$$(echo "$$line" | cut -d ':' -f 5-); \
 				printf "%$(INDENT).s $(DARK_PURPLE)║$(RESET) $(LIGHT_PURPLE)$(BOLD)%-104s$(RESET) $(DARK_PURPLE)║$(RESET)\n" "" "$$file_and_line"; \
@@ -165,10 +169,10 @@ define display_warning
 					words_count=$$(echo -n "$$trim_text_line" | wc -m); \
 					padding_size=$$(expr $(REAL_SIZE_CMD) - $$words_count); \
 					if [ "$$is_first_line" = true ]; then \
-						printf "%$(INDENT).s $(DARK_PURPLE)║$(RESET)  $(DARK_YELLOW) $(RESET) %-s%*s$(DARK_PURPLE)║$(RESET)\n" "" "$$trim_text_line" $$(expr $$padding_size - 6) ""; \
+						printf "%$(INDENT).s $(DARK_PURPLE)║$(RESET)  $(3) $(RESET) %-s%*s$(DARK_PURPLE)║$(RESET)\n" "" "$$trim_text_line" $$(expr $$padding_size - 6) ""; \
 						is_first_line=false; \
 					else \
-						printf "%$(INDENT).s $(DARK_PURPLE)║$(RESET)   %-s%*s$(DARK_PURPLE)║$(RESET)\n" "" "$$trim_text_line" $$(expr $$padding_size - 4) ""; \
+						printf "%$(INDENT).s $(DARK_PURPLE)║$(RESET)     %-s%*s$(DARK_PURPLE)║$(RESET)\n" "" "$$trim_text_line" $$(expr $$padding_size - 6) ""; \
 					fi; \
 				done; \
 				printf "%$(INDENT).s $(DARK_PURPLE)║$(RESET)%*s$(DARK_PURPLE)║$(RESET)\n" "" "$$(expr $(REAL_SIZE_CMD) - 1)";\
@@ -187,8 +191,19 @@ endef
 
 .PHONY: all BANNER FILES_STRUCTURE_SECTION PRE_CHECKS_SECTION clear re
 
-all: BANNER FILES_STRUCTURE_SECTION PRE_CHECKS_SECTION $(OBJS) WARNINGS_SECTION ERRORS_SECTION SUMMARY_SECTION TESTS_SECTION
+all: CREATE_TMP BANNER FILES_STRUCTURE_SECTION PRE_CHECKS_SECTION $(OBJS) WARNINGS_SECTION ERRORS_SECTION SUMMARY_SECTION TESTS_SECTION REMOVE_TMP
 
+CREATE_TMP:
+	@echo 0 > $(ERROR_COUNT)
+
+REMOVE_TMP:
+	@rm -rf $(WARNING_LOGS)
+	@rm -rf $(ERROR_COUNT)
+	@rm -rf $(ERROR_LOGS)
+
+FILTER_LOGS:
+	@grep "attention:" $(ERROR_LOGS) > $(WARNING_LOGS) || true
+	@grep -v "attention:" $(ERROR_LOGS) > temp && mv temp $(ERROR_LOGS) || true
 
 BANNER:
 	@echo -ne "\x1b[?25l"
@@ -215,12 +230,12 @@ BANNER:
 	@printf "╣$(RESET)\n"
 
 FILES_STRUCTURE_SECTION:
-	$(call display_header_section,,FILE STRUCTURE)
+	$(call display_header_section,,FILE STRUCTURE,0)
 	$(call list_files,$(SRCS),$(INCLUDES))
 	$(call close_section)
 
 PRE_CHECKS_SECTION:
-	$(call display_header_section,📋,PRE-CHECKS)
+	$(call display_header_section,📋,PRE-CHECKS,0)
 	@printf "%$(INDENT).s $(DARK_PURPLE)║     $(GREEN)✔$(WHITE)  %-$(shell expr $(REAL_SIZE_CMD) - 9)s$(DARK_PURPLE)║\n" "" "Headers verified."
 	@printf "%$(INDENT).s $(DARK_PURPLE)║     $(GREEN)✔$(WHITE)  %-$(shell expr $(REAL_SIZE_CMD) - 9)s$(DARK_PURPLE)║\n" "" "Source files verified."
 	@printf "%$(INDENT).s $(DARK_PURPLE)║     $(GREEN)✔$(WHITE)  %-$(shell expr $(REAL_SIZE_CMD) - 9)s$(DARK_PURPLE)║\n" "" "Libraries up to date."
@@ -229,25 +244,26 @@ PRE_CHECKS_SECTION:
 
 
 COMPILING_SECTION:
-	$(call display_header_section,🚀,COMPILATION PROCESS)
+	$(call display_header_section,🚀,COMPILATION PROCESS,0)
 	$(call close_section)
 
-WARNINGS_SECTION:
+WARNINGS_SECTION: FILTER_LOGS
 	@echo -ne "\n"
 	$(call close_section)
-	$(call display_header_section,🚧,WARNINGS)
-	$(call display_warning)
+	$(call display_header_section,🚧,$$(wc -l < $(WARNING_LOGS)) WARNINGS trouvées,1)
+	$(call display_warning,$(WARNING_LOGS),attention,$(DARK_YELLOW),$$(($$(wc -l < $(WARNING_LOGS)))))
 	$(call close_section)
-	@rm -rf $(WARNING_LOGS)
 
-ERRORS_SECTION:
-	$(call display_header_section,💥,ERRORS)
+ERRORS_SECTION: 
+	$(call display_header_section,💥,`cat $(ERROR_COUNT)` ERREURS trouvées,1)
+	$(call display_warning,$(ERROR_LOGS),erreur,$(DARK_RED),`cat $(ERROR_COUNT)`)
+	$(call close_section)
 
 SUMMARY_SECTION:
-	$(call display_header_section,📊,BUILD SUMMARY)
+	$(call display_header_section,📊,BUILD SUMMARY,0)
 
 TESTS_SECTION:
-	$(call display_header_section,🧪,TESTS)
+	$(call display_header_section,🧪,TESTS,0)
 	@echo -ne "\x1b[?25h"
 
 %.o: %.c
@@ -256,7 +272,9 @@ TESTS_SECTION:
 	@echo -ne "\033[2A"
 	$(call moon_loading,$<)
 	$(call progress_bar,$(words $(SRCS)),75)
-	@$(CC) -c $< -o $@ $(LIBS) $(INCLUDES_DIR) $(CFLAGS) 2>> $(WARNING_LOGS)
+	@if ! $(CC) -c $< -o $@ $(LIBS) $(INCLUDES_DIR) $(CFLAGS) 2>> $(ERROR_LOGS); then \
+		expr `cat $(ERROR_COUNT)` + 1 > $(ERROR_COUNT);\
+	fi
 
 clear:
 	@rm -rf $(OBJS)
