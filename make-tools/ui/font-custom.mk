@@ -1,0 +1,12 @@
+DARK_PURPLE			= \x1b[38;2;179;153;250m
+PURPLE					= \x1b[38;2;196;160;250m
+RED							= \x1b[38;2;219;94;115m
+DARK_RED				= \x1b[38;2;240;64;65m
+LIGHT_PURPLE		= \x1b[38;2;216;177;250m
+GREEN						= \x1b[38;2;202;250;166m
+YELLOW					= \x1b[38;2;250;235;185m
+DARK_YELLOW			= \x1b[38;2;250;235;135m
+WHITE						= \x1b[38;2;255;255;255m
+RESET						= \x1b[0;0m
+BOLD						= \x1b[1m
+ITALIC					= \x1b[3m
