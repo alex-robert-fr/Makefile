@@ -7,4 +7,6 @@ _INCLUDES_FLAGS		=	-Isrc/includes -Isrc/lib/minilibx-linux
 _LIBS_FLAGS				=	
 _CFLAGS						= 
 
+_THEME						= default
+
 include ./make-tools/base.mk
