@@ -8,5 +8,6 @@ _LIBS_FLAGS				=
 _CFLAGS						= 
 
 _THEME						= default
+_MAX-WIDTH				= 110
 
 include ./make-tools/base.mk
