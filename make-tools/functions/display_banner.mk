@@ -4,7 +4,7 @@ define display_banner
 	line_per_color=$$(($$num_line / 3));																\
 	index_line=0;																												\
 	length=$$(echo "$$banner" | head -n 1 | wc -m);											\
-	indent=$$(expr \( ${MAX_WIDTH} - $$length \) / 2 );									\
+	indent=$$(expr \( ${MAX_WIDTH} - $$length + 1 \) / 2 );							\
 	echo "$$banner" | while IFS= read -r line; do												\
 		if [ "$$index_line" -lt "$$line_per_color" ]; then								\
 			printf "%*s${PRIMARY_ONE}%s${RESET}\n" $$indent "" "$$line";		\
