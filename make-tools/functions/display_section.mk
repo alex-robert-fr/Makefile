@@ -28,11 +28,23 @@ define display_section
 			while [ "$$x" -le "$$num_cols" ]; do																						\
 				all_cols=$$(printf "%s" "$$line" | cut -d$$'\t' -f"$$(($$x+1))");							\
 				col_one=$$(printf "%s" "$$all_cols" | cut -d',' -f1);													\
-				col_two=$$(printf "%s" "$$all_cols" | cut -d',' -f2);					\
+				col_two=$$(printf "%s" "$$all_cols" | cut -d',' -f2);													\
 				printf "$(PRIMARY_ONE)$(EMOJI_VERTICAL_LINE)$(RESET)%s%s " "$$col_one" "$$col_two"; 																			\
 				x=$$((x+1));																																	\
 			done;																																						\
 			printf "$(PRIMARY_ONE)$(EMOJI_VERTICAL_LINE)$(RESET)";													\
+		elif [ "$$line" = "-" ] && [ -n "$$i" ]; then																			\
+			printf "$(PRIMARY_ONE)%*s$(EMOJI_MIDDLE_LEFT)" $$indent;										\
+			x=1;																																						\
+			while [ "$$x" -le "$$num_cols" ]; do																						\
+				printf "%0.s$(EMOJI_HORIZONTAL_LINE)" `seq 1 $$(($$length / $$num_cols))`;		\
+				if [ "$$x" -eq "$$num_cols" ]; then																						\
+					printf "$(EMOJI_MIDDLE_RIGHT)$(RESET)"; 																\
+				else																																					\
+					printf "$(EMOJI_BOT_MIDDLE_CORNER)";																				\
+				fi;																																						\
+				x=$$((x+1));																																	\
+			done;																																						\
 		elif [ "$$line" = "=" ] && [ -n "$$i" ]; then																			\
 			printf "$(PRIMARY_ONE)%*s$(EMOJI_BOT_LEFT_CORNER)" $$indent;										\
 			x=1;																																						\
