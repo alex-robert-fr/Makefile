@@ -10,11 +10,11 @@ BUILD_TYPE							= Debug
 MAKEFILE_LAST_UPDATE		:= $(shell date -d "$(shell stat -c %y Makefile)" +'%Y-%m-%d %H:%M')
 
 
+include ./make-tools/config/themes/$(THEME).mk
 include ./make-tools/config/banner.mk
+include ./make-tools/config/schemas/dashboard.mk
 include ./make-tools/functions/display_banner.mk
 include ./make-tools/functions/display_section.mk
-include ./make-tools/functions/text_format.mk
-include ./make-tools/config/themes/$(THEME).mk
 
 .PHONY: all BANNER DASHBOARD
 
@@ -26,8 +26,6 @@ INIT:
 BANNER:
 	@printf "\n\n";
 	$(call display_banner)
-	@printf "\n\n";
 
 DASHBOARD: 
-	$(eval result=$(shell $(call column_length,Texte,50)))
-	$(call display_section,"./make-tools/config/schemas/dashboard.txt")
+	$(call display_section,"$$dashboard")
