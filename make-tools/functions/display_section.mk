@@ -1,5 +1,6 @@
 # Display section
 # Schema file
+# Separations
 define display_section
 	@indent=$$((${MAX_WIDTH} / 20));																										\
 	length=$$((${MAX_WIDTH} - ($$indent * 2)));																					\
@@ -16,7 +17,7 @@ define display_section
 			while [ "$$x" -le "$$num_cols" ]; do																						\
 				printf "%0.s$(EMOJI_HORIZONTAL_LINE)" `seq 1 $$length_col`;										\
 				if [ "$$x" -eq "$$num_cols" ]; then																						\
-					printf "$(EMOJI_TOP_RIGHT_CORNER)$(RESET)"; 																\
+					printf "$(EMOJI_TOP_RIGHT_CORNER)$(RESET)\n"; 																\
 				else																																					\
 					printf "$(EMOJI_TOP_MIDDLE_CORNER)";																				\
 				fi;																																						\
@@ -29,19 +30,19 @@ define display_section
 				all_cols=$$(printf "%s" "$$line" | cut -d$$'\t' -f"$$(($$x+1))");							\
 				col_one=$$(printf "%s" "$$all_cols" | cut -d',' -f1);													\
 				col_two=$$(printf "%s" "$$all_cols" | cut -d',' -f2);													\
-				printf "$(PRIMARY_ONE)$(EMOJI_VERTICAL_LINE)$(RESET)%s%s " "$$col_one" "$$col_two"; 																			\
+				printf "$(PRIMARY_ONE)$(EMOJI_VERTICAL_LINE)$(RESET)%s%s " "$$col_one" "$$col_two"; \
 				x=$$((x+1));																																	\
 			done;																																						\
-			printf "$(PRIMARY_ONE)$(EMOJI_VERTICAL_LINE)$(RESET)";													\
+			printf "$(PRIMARY_ONE)$(EMOJI_VERTICAL_LINE)$(RESET)\n";													\
 		elif [ "$$line" = "-" ] && [ -n "$$i" ]; then																			\
 			printf "$(PRIMARY_ONE)%*s$(EMOJI_MIDDLE_LEFT)" $$indent;										\
 			x=1;																																						\
 			while [ "$$x" -le "$$num_cols" ]; do																						\
 				printf "%0.s$(EMOJI_HORIZONTAL_LINE)" `seq 1 $$(($$length / $$num_cols))`;		\
 				if [ "$$x" -eq "$$num_cols" ]; then																						\
-					printf "$(EMOJI_MIDDLE_RIGHT)$(RESET)"; 																\
+					printf "$(EMOJI_MIDDLE_RIGHT)$(RESET)\n"; 																\
 				else																																					\
-					printf "$(EMOJI_BOT_MIDDLE_CORNER)";																				\
+					printf "$(2)";																				\
 				fi;																																						\
 				x=$$((x+1));																																	\
 			done;																																						\
@@ -51,16 +52,15 @@ define display_section
 			while [ "$$x" -le "$$num_cols" ]; do																						\
 				printf "%0.s$(EMOJI_HORIZONTAL_LINE)" `seq 1 $$(($$length / $$num_cols))`;		\
 				if [ "$$x" -eq "$$num_cols" ]; then																						\
-					printf "$(EMOJI_BOT_RIGHT_CORNER)$(RESET)"; 																\
+					printf "$(EMOJI_BOT_RIGHT_CORNER)$(RESET)\n"; 																\
 				else																																					\
 					printf "$(EMOJI_BOT_MIDDLE_CORNER)";																				\
 				fi;																																						\
 				x=$$((x+1));																																	\
 			done;																																						\
 		else																																							\
-			printf "test";																																	\
+			printf "error";																																	\
 		fi;																																								\
-		printf "\n";																																			\
 		i=$$(($$i+1));																																		\
 	done;
 endef

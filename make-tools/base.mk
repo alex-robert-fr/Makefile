@@ -28,4 +28,4 @@ BANNER:
 	$(call display_banner)
 
 DASHBOARD: 
-	$(call display_section,"$$dashboard")
+	$(call display_section,"$$dashboard","$(EMOJI_BOT_MIDDLE_CORNER)")
