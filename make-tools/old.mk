@@ -69,6 +69,7 @@ include ./make-tools/config/banner.mk
 # params: EMOJI, TEXTE, Margin
 define display_header_section
 	@printf "%$(INDENT).s $(DARK_PURPLE)║ $(WHITE)$(BOLD)%-$(shell expr $(REAL_SIZE_CMD) + $(3))s$(RESET)$(DARK_PURPLE)║\n" '' "$(1)  $(2)"
+
 	@printf "%$(INDENT).s ╠"
 	@printf "%0.s═" `seq 1 $(shell expr $(REAL_SIZE_CMD) - 1)`
 	@printf "╣$(RESET)\n"

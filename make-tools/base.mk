@@ -13,12 +13,13 @@ MAKEFILE_LAST_UPDATE		:= $(shell date -d "$(shell stat -c %y Makefile)" +'%Y-%m-
 include ./make-tools/config/themes/$(THEME).mk
 include ./make-tools/config/banner.mk
 include ./make-tools/config/schemas/dashboard.mk
+include ./make-tools/config/schemas/file_structure.mk
 include ./make-tools/functions/display_banner.mk
 include ./make-tools/functions/display_section.mk
 
-.PHONY: all BANNER DASHBOARD
+.PHONY: all BANNER DASHBOARD FILE_STRUCTURE
 
-all: INIT BANNER DASHBOARD
+all: INIT BANNER DASHBOARD FILE_STRUCTURE
 
 INIT:
 	@clear
@@ -29,3 +30,6 @@ BANNER:
 
 DASHBOARD: 
 	$(call display_section,"$$dashboard","$(EMOJI_BOT_MIDDLE_CORNER)")
+
+FILE_STRUCTURE:
+	$(call display_section, "$$file_structure","$(EMOJI_BOT_MIDDLE_CORNER)")
