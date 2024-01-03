@@ -10,7 +10,8 @@ _LIBS_FLAGS							=
 _CFLAGS									= 
 
 _THEME									= default
-_MAX-WIDTH							= 115
+_MAX-WIDTH							= 110
+_INDENT									= 3
 
 # Emoji
 EMOJI_HORIZONTAL_LINE		=	"═"

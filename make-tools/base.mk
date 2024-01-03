@@ -1,5 +1,6 @@
 THEME										=	$(_THEME)
 MAX_WIDTH								=	$(_MAX-WIDTH)
+INDENT									=	$(_INDENT)
 AUTHOR									= $(_AUTHOR)
 PROJECT_NAME						=	$(_PROJECT_NAME)
 GITHUB									=	$(_GITHUB)
@@ -12,14 +13,14 @@ MAKEFILE_LAST_UPDATE		:= $(shell date -d "$(shell stat -c %y Makefile)" +'%Y-%m-
 
 include ./make-tools/config/themes/$(THEME).mk
 include ./make-tools/config/banner.mk
-include ./make-tools/config/schemas/dashboard.mk
-include ./make-tools/config/schemas/file_structure.mk
 include ./make-tools/functions/display_banner.mk
+include ./make-tools/functions/section/borders.mk
+include ./make-tools/functions/section/columns.mk
 include ./make-tools/functions/display_section.mk
 
-.PHONY: all BANNER DASHBOARD FILE_STRUCTURE
+.PHONY: all BANNER DASHBOARD DASHBOARD_RULE FILE_STRUCTURE FILE_STRUCTURE_RULE
 
-all: INIT BANNER DASHBOARD FILE_STRUCTURE
+all: INIT BANNER DASHBOARD DASHBOARD_RULE FILE_STRUCTURE FILE_STRUCTURE_RULE
 
 INIT:
 	@clear
@@ -28,8 +29,9 @@ BANNER:
 	@printf "\n\n";
 	$(call display_banner)
 
-DASHBOARD: 
-	$(call display_section,"$$dashboard","$(EMOJI_BOT_MIDDLE_CORNER)")
+include ./make-tools/rules/dashboard_section/dashboard_rules.mk
+DASHBOARD: DASHBOARD_RULE
 
-FILE_STRUCTURE:
-	$(call display_section, "$$file_structure","$(EMOJI_BOT_MIDDLE_CORNER)")
+include ./make-tools/rules/file_structure_section/file_structure_rules.mk
+FILE_STRUCTURE: FILE_STRUCTURE_RULE
+	
