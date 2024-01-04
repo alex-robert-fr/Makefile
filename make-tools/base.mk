@@ -1,6 +1,12 @@
+INCLUDES_DIR						=	$(_INCLUDES_DIR)
+INCLUDES								=	$(foreach dir, $(INCLUDES_DIR), $(wildcard $(dir)/*.h))
+SRCS_DIR								=	$(_SRCS_DIR)
+SRCS										=	$(foreach dir, $(SRCS_DIR), $(wildcard $(dir)/*.c))
+
 THEME										=	$(_THEME)
 MAX_WIDTH								=	$(_MAX-WIDTH)
 INDENT									=	$(_INDENT)
+
 AUTHOR									= $(_AUTHOR)
 PROJECT_NAME						=	$(_PROJECT_NAME)
 GITHUB									=	$(_GITHUB)
@@ -34,4 +40,3 @@ DASHBOARD: DASHBOARD_RULE
 
 include ./make-tools/rules/file_structure_section/file_structure_rules.mk
 FILE_STRUCTURE: FILE_STRUCTURE_RULE
-	
