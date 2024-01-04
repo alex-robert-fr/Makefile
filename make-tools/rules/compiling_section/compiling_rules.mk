@@ -24,9 +24,10 @@ define progress_bar
     @printf "\r%*s$(PRIMARY_ONE)$(EMOJI_VERTICAL_LINE)$(RESET)    %s %-26s$(PRIMARY_ONE)$(EMOJI_VERTICAL_LINE)$(RESET)" $(INDENT) "" $(TEXT_PROGRESS_BAR) "$(PERCENT)%";
 endef
 
-COMPILING_RULE: ${OBJS}
+COMPILING_RULE: $(OBJS)
 
 %.o: %.c
+	@$(CC) -c $< -o $@ $(LIBS) $(CFLAGS) 2> /dev/null
 	$(call moon_loading,$<)
 	$(call progress_bar,$(words $(SRCS)),75)
 	@printf "\n"

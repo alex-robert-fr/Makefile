@@ -1,3 +1,4 @@
+_CC											=	gcc
 _AUTHOR									=	0x7c00
 _PROJECT_NAME						=	Makefile
 _GITHUB									=	https://github.com/alex-robert-fr

@@ -1,8 +1,11 @@
+CC											=	$(_CC)
 INCLUDES_DIR						=	$(_INCLUDES_DIR)
 INCLUDES								=	$(foreach dir, $(INCLUDES_DIR), $(wildcard $(dir)/*.h))
 SRCS_DIR								=	$(_SRCS_DIR)
 SRCS										=	$(foreach dir, $(SRCS_DIR), $(wildcard $(dir)/*.c))
-OBJS										=	$(SRCS:.c=.o)
+OBJS										:=	$(SRCS:.c=.o)
+LIBS										=	$(_LIBS_DIR)
+CFLAGS									=	$(_INCLUDES_FLAGS) $(_LIBS_FLAGS) -Wall -Wextra $(_CFLAGS)
 
 THEME										=	$(_THEME)
 MAX_WIDTH								=	$(_MAX-WIDTH)
@@ -32,7 +35,7 @@ include ./make-tools/functions/display_section.mk
 all: INIT BANNER DASHBOARD DASHBOARD_RULE FILE_STRUCTURE FILE_STRUCTURE_RULE PRE_CHECKS PRE_CHECKS_RULE COMPILING COMPILING_RULE WARNINGS WARNINGS_RULE ERRORS ERRORS_RULE SUMMARY SUMMARY_RULE
 
 clear:
-	rm -rf $(OBJS)
+	@rm -rf $(OBJS)
 
 re: clear all
 
@@ -63,3 +66,4 @@ ERRORS: ERRORS_RULE
 
 include ./make-tools/rules/summay_section/summary_rules.mk
 SUMMARY: SUMMARY_RULE
+
