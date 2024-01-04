@@ -2,6 +2,7 @@ INCLUDES_DIR						=	$(_INCLUDES_DIR)
 INCLUDES								=	$(foreach dir, $(INCLUDES_DIR), $(wildcard $(dir)/*.h))
 SRCS_DIR								=	$(_SRCS_DIR)
 SRCS										=	$(foreach dir, $(SRCS_DIR), $(wildcard $(dir)/*.c))
+OBJS										=	$(SRCS:.c=.o)
 
 THEME										=	$(_THEME)
 MAX_WIDTH								=	$(_MAX-WIDTH)
@@ -14,7 +15,9 @@ PROJECT_VERSION					= $(_PROJECT_VERSION)
 COMPILER								= $(shell $(CC) --version | head -n 1 | awk '{print toupper($$1), $$3}')
 OS_VERSION							= $(shell lsb_release -si; lsb_release -sr)
 BUILD_TYPE							= Debug
-MAKEFILE_LAST_UPDATE		:= $(shell date -d "$(shell stat -c %y Makefile)" +'%Y-%m-%d %H:%M')
+MAKEFILE_LAST_UPDATE		= $(shell date -d "$(shell stat -c %y Makefile)" +'%Y-%m-%d %H:%M')
+
+LOADING_EMOJIS 					= 🌑 🌒 🌓 🌔 🌕 🌖 🌗 🌘
 
 
 include ./make-tools/config/themes/$(THEME).mk
@@ -24,9 +27,14 @@ include ./make-tools/functions/section/borders.mk
 include ./make-tools/functions/section/columns.mk
 include ./make-tools/functions/display_section.mk
 
-.PHONY: all BANNER DASHBOARD DASHBOARD_RULE FILE_STRUCTURE FILE_STRUCTURE_RULE
+.PHONY: all BANNER DASHBOARD DASHBOARD_RULE FILE_STRUCTURE FILE_STRUCTURE_RULE PRE_CHECKS PRE_CHECKS_RULE COMPILING COMPILING_RULE
 
-all: INIT BANNER DASHBOARD DASHBOARD_RULE FILE_STRUCTURE FILE_STRUCTURE_RULE
+all: INIT BANNER DASHBOARD DASHBOARD_RULE FILE_STRUCTURE FILE_STRUCTURE_RULE PRE_CHECKS PRE_CHECKS_RULE COMPILING COMPILING_RULE
+
+clear:
+	rm -rf $(OBJS)
+
+re: clear all
 
 INIT:
 	@clear
@@ -40,3 +48,9 @@ DASHBOARD: DASHBOARD_RULE
 
 include ./make-tools/rules/file_structure_section/file_structure_rules.mk
 FILE_STRUCTURE: FILE_STRUCTURE_RULE
+
+include ./make-tools/rules/pre-checks_section/pre-ckecks_rules.mk
+PRE_CHECKS: PRE_CHECKS_RULE
+
+include ./make-tools/rules/compiling_section/compiling_rules.mk
+COMPILING: COMPILING_RULE
