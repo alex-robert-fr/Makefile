@@ -27,7 +27,9 @@ endef
 COMPILING_RULE: $(OBJS)
 
 %.o: %.c
-	@$(CC) -c $< -o $@ $(LIBS) $(CFLAGS) 2> /dev/null
+	@if ! $(CC) -c $< -o $@ $(LIBS) $(CFLAGS) 2>> $(LOGS_DIR)$(TMP_LOGS);	then	\
+		var=rien;\
+	fi
 	$(call moon_loading,$<)
 	$(call progress_bar,$(words $(SRCS)),75)
 	@printf "\n"
