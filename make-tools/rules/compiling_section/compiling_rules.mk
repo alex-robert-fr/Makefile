@@ -27,7 +27,6 @@ endef
 COMPILING_RULE: ${OBJS}
 
 %.o: %.c
-	@sleep 0.5
 	$(call moon_loading,$<)
 	$(call progress_bar,$(words $(SRCS)),75)
 	@printf "\n"
