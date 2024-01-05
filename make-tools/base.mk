@@ -38,6 +38,9 @@ include ./make-tools/functions/display_section.mk
 
 all: INIT INIT_LOGS  BANNER DASHBOARD FILE_STRUCTURE PRE_CHECKS COMPILING LOGS WARNINGS ERRORS SUMMARY CLEAR_LOGS 
 
+update:
+	@./make-tools/update.sh
+
 clear:
 	@rm -rf $(OBJS)
 
