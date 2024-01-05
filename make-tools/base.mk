@@ -25,6 +25,7 @@ LOGS_DIR								=	./make-tools/tmp/
 TMP_LOGS								=	logs.tmp
 WARNINGS_LOGS						=	warnings.tmp
 ERRORS_LOGS							=	errors.tmp
+TOTAL_FILES							=	0
 
 include ./make-tools/config/themes/$(THEME).mk
 include ./make-tools/config/banner.mk
@@ -47,6 +48,7 @@ INIT:
 
 INIT_LOGS:
 	@mkdir $(LOGS_DIR)
+	@touch $(LOGS_DIR)$(TMP_LOGS)
 
 CLEAR_LOGS:
 	@rm -rf $(LOGS_DIR)
